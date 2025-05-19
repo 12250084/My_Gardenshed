@@ -1,125 +1,142 @@
-import React, { useContext, useState } from 'react'
-import loginIcons from '../assest/signin.gif'
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+import React, { useContext, useState } from 'react';
+import {
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+
+import {
+  Visibility,
+  VisibilityOff
+} from '@mui/icons-material';
+
 import { Link, useNavigate } from 'react-router-dom';
 import SummaryApi from '../common';
 import { toast } from 'react-toastify';
 import Context from '../context';
+import loginIcons from '../assest/signin.gif';
 
 const Login = () => {
-    const [showPassword,setShowPassword] = useState(false)
-    const [data,setData] = useState({
-        email : "",
-        password : ""
-    })
-    const navigate = useNavigate()
-    const { fetchUserDetails, fetchUserAddToCart } = useContext(Context)
+  const [showPassword, setShowPassword] = useState(false);
+  const [data, setData] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
+  const { fetchUserDetails, fetchUserAddToCart } = useContext(Context);
 
-    const handleOnChange = (e) =>{
-        const { name , value } = e.target
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
 
-        setData((preve)=>{
-            return{
-                ...preve,
-                [name] : value
-            }
-        })
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const dataResponse = await fetch(SummaryApi.signIn.url, {
+      method: SummaryApi.signIn.method,
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const dataApi = await dataResponse.json();
+
+    if (dataApi.success) {
+      toast.success(dataApi.message);
+      navigate('/');
+      fetchUserDetails();
+      fetchUserAddToCart();
     }
 
-
-    const handleSubmit = async(e) =>{
-        e.preventDefault()
-
-        const dataResponse = await fetch(SummaryApi.signIn.url,{
-            method : SummaryApi.signIn.method,
-            credentials : 'include',
-            headers : {
-                "content-type" : "application/json"
-            },
-            body : JSON.stringify(data)
-        })
-
-        const dataApi = await dataResponse.json()
-
-        if(dataApi.success){
-            toast.success(dataApi.message)
-            navigate('/')
-            fetchUserDetails()
-            fetchUserAddToCart()
-        }
-
-        if(dataApi.error){
-            toast.error(dataApi.message)
-        }
-
+    if (dataApi.error) {
+      toast.error(dataApi.message);
     }
+  };
 
-    console.log("data login",data)
-    
   return (
-    <section id='login'>
-        <div className='mx-auto container p-4'>
+    <Box
+      id="login"
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(to right, #fdf2f8, #e0f7fa)',
+        px: 2,
+      }}
+    >
+      <Paper elevation={4} sx={{ p: 4, maxWidth: 400, width: '100%' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <img src={loginIcons} alt="Login Icon" style={{ width: 80, height: 80 }} />
+        </Box>
 
-            <div className='bg-white p-5 w-full max-w-sm mx-auto'>
-                    <div className='w-20 h-20 mx-auto'>
-                        <img src={loginIcons} alt='login icons'/>
-                    </div>
+        <Typography variant="h5" align="center" gutterBottom>
+          Sign in to your account
+        </Typography>
 
-                    <form className='pt-6 flex flex-col gap-2' onSubmit={handleSubmit}>
-                        <div className='grid'>
-                            <label>Email : </label>
-                            <div className='bg-slate-100 p-2'>
-                                <input 
-                                    type='email' 
-                                    placeholder='enter email' 
-                                    name='email'
-                                    value={data.email}
-                                    onChange={handleOnChange}
-                                    className='w-full h-full outline-none bg-transparent'/>
-                            </div>
-                        </div>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            value={data.email}
+            onChange={handleOnChange}
+            variant="outlined"
+            margin="normal"
+            type="email"
+            required
+          />
 
-                        <div>
-                            <label>Password : </label>
-                            <div className='bg-slate-100 p-2 flex'>
-                                <input 
-                                    type={showPassword ? "text" : "password"} 
-                                    placeholder='enter password'
-                                    value={data.password}
-                                    name='password' 
-                                    onChange={handleOnChange}
-                                    className='w-full h-full outline-none bg-transparent'/>
-                                <div className='cursor-pointer text-xl' onClick={()=>setShowPassword((preve)=>!preve)}>
-                                    <span>
-                                        {
-                                            showPassword ? (
-                                                <FaEyeSlash/>
-                                            )
-                                            :
-                                            (
-                                                <FaEye/>
-                                            )
-                                        }
-                                    </span>
-                                </div>
-                            </div>
-                            <Link to={'/forgot-password'} className='block w-fit ml-auto hover:underline hover:text-red-600'>
-                                Forgot password ?
-                            </Link>
-                        </div>
+          <TextField
+            fullWidth
+            label="Password"
+            name="password"
+            value={data.password}
+            onChange={handleOnChange}
+            variant="outlined"
+            margin="normal"
+            type={showPassword ? 'text' : 'password'}
+            required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
 
-                        <button className='bg-red-600 hover:bg-red-700 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6'>Login</button>
+          <Box sx={{ textAlign: 'right', mt: 1 }}>
+            <Link to="/forgot-password" style={{ fontSize: 14, color: '#d32f2f' }}>
+              Forgot password?
+            </Link>
+          </Box>
 
-                    </form>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="error"
+            sx={{ mt: 4, borderRadius: 5, textTransform: 'none' }}
+          >
+            Login
+          </Button>
+        </Box>
 
-                    <p className='my-5'>Don't have account ? <Link to={"/sign-up"} className=' text-red-600 hover:text-red-700 hover:underline'>Sign up</Link></p>
-            </div>
+        <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+          Don't have an account?{' '}
+          <Link to="/sign-up" style={{ color: '#d32f2f', textDecoration: 'none' }}>
+            Sign up
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
+  );
+};
 
-
-        </div>
-    </section>
-  )
-}
-
-export default Login
+export default Login;

@@ -1,205 +1,190 @@
-import React, { useContext, useEffect, useState } from 'react'
-import SummaryApi from '../common'
-import Context from '../context'
-import displayINRCurrency from '../helpers/displayCurrency'
-import { MdDelete } from "react-icons/md";
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  Box,
+  Typography,
+  IconButton,
+  Card,
+  CardContent,
+  CardMedia,
+  Button,
+  CircularProgress,
+  Grid,
+  Divider,
+  Paper,
+} from '@mui/material';
+import { MdDelete } from 'react-icons/md';
+import SummaryApi from '../common';
+import Context from '../context';
+import displayINRCurrency from '../helpers/displayCurrency';
 
 const Cart = () => {
-    const [data,setData] = useState([])
-    const [loading,setLoading] = useState(false)
-    const context = useContext(Context)
-    const loadingCart = new Array(4).fill(null)
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const context = useContext(Context);
 
-
-    const fetchData = async() =>{
-        
-        const response = await fetch(SummaryApi.addToCartProductView.url,{
-            method : SummaryApi.addToCartProductView.method,
-            credentials : 'include',
-            headers : {
-                "content-type" : 'application/json'
-            },
-        })
-       
-
-        const responseData = await response.json()
-
-        if(responseData.success){
-            setData(responseData.data)
-        }
-
-
+  const fetchData = async () => {
+    setLoading(true);
+    const response = await fetch(SummaryApi.addToCartProductView.url, {
+      method: SummaryApi.addToCartProductView.method,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const responseData = await response.json();
+    if (responseData.success) {
+      setData(responseData.data);
     }
+    setLoading(false);
+  };
 
-    const handleLoading = async() =>{
-        await fetchData()
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const updateQty = async (id, qty) => {
+    const response = await fetch(SummaryApi.updateCartProduct.url, {
+      method: SummaryApi.updateCartProduct.method,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ _id: id, quantity: qty }),
+    });
+    const result = await response.json();
+    if (result.success) fetchData();
+  };
+
+  const deleteCartProduct = async (id) => {
+    const response = await fetch(SummaryApi.deleteCartProduct.url, {
+      method: SummaryApi.deleteCartProduct.method,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ _id: id }),
+    });
+    const result = await response.json();
+    if (result.success) {
+      fetchData();
+      context.fetchUserAddToCart();
     }
+  };
 
-    useEffect(()=>{
-        setLoading(true)
-        handleLoading()
-         setLoading(false)
-    },[])
+  const totalQty = data.reduce((acc, cur) => acc + cur.quantity, 0);
+  const totalPrice = data.reduce(
+    (acc, cur) => acc + cur.quantity * cur?.productId?.sellingPrice,
+    0
+  );
 
-
-    const increaseQty = async(id,qty) =>{
-        const response = await fetch(SummaryApi.updateCartProduct.url,{
-            method : SummaryApi.updateCartProduct.method,
-            credentials : 'include',
-            headers : {
-                "content-type" : 'application/json'
-            },
-            body : JSON.stringify(
-                {   
-                    _id : id,
-                    quantity : qty + 1
-                }
-            )
-        })
-
-        const responseData = await response.json()
-
-
-        if(responseData.success){
-            fetchData()
-        }
-    }
-
-
-    const decraseQty = async(id,qty) =>{
-       if(qty >= 2){
-            const response = await fetch(SummaryApi.updateCartProduct.url,{
-                method : SummaryApi.updateCartProduct.method,
-                credentials : 'include',
-                headers : {
-                    "content-type" : 'application/json'
-                },
-                body : JSON.stringify(
-                    {   
-                        _id : id,
-                        quantity : qty - 1
-                    }
-                )
-            })
-
-            const responseData = await response.json()
-
-
-            if(responseData.success){
-                fetchData()
-            }
-        }
-    }
-
-    const deleteCartProduct = async(id)=>{
-        const response = await fetch(SummaryApi.deleteCartProduct.url,{
-            method : SummaryApi.deleteCartProduct.method,
-            credentials : 'include',
-            headers : {
-                "content-type" : 'application/json'
-            },
-            body : JSON.stringify(
-                {   
-                    _id : id,
-                }
-            )
-        })
-
-        const responseData = await response.json()
-
-        if(responseData.success){
-            fetchData()
-            context.fetchUserAddToCart()
-        }
-    }
-
-    const totalQty = data.reduce((previousValue,currentValue)=> previousValue + currentValue.quantity,0)
-    const totalPrice = data.reduce((preve,curr)=> preve + (curr.quantity * curr?.productId?.sellingPrice) ,0)
   return (
-    <div className='container mx-auto'>
-        
-        <div className='text-center text-lg my-3'>
-            {
-                data.length === 0 && !loading && (
-                    <p className='bg-white py-5'>No Data</p>
-                )
-            }
-        </div>
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h5" sx={{ mb: 3, textAlign: 'center' }}>
+        Shopping Cart
+      </Typography>
 
-        <div className='flex flex-col lg:flex-row gap-10 lg:justify-between p-4'>   
-                {/***view product */}
-                <div className='w-full max-w-3xl'>
-                    {
-                        loading ? (
-                            loadingCart?.map((el,index) => {
-                                return(
-                                    <div key={el+"Add To Cart Loading"+index} className='w-full bg-slate-200 h-32 my-2 border border-slate-300 animate-pulse rounded'>
-                                    </div>
-                                )
-                            })
-                             
-                        ) : (
-                          data.map((product,index)=>{
-                           return(
-                            <div key={product?._id+"Add To Cart Loading"} className='w-full bg-white h-32 my-2 border border-slate-300  rounded grid grid-cols-[128px,1fr]'>
-                                <div className='w-32 h-32 bg-slate-200'>
-                                    <img src={product?.productId?.productImage[0]} className='w-full h-full object-scale-down mix-blend-multiply' />
-                                </div>
-                                <div className='px-4 py-2 relative'>
-                                    {/**delete product */}
-                                    <div className='absolute right-0 text-red-600 rounded-full p-2 hover:bg-red-600 hover:text-white cursor-pointer' onClick={()=>deleteCartProduct(product?._id)}>
-                                        <MdDelete/>
-                                    </div>
+      {loading ? (
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      ) : data.length === 0 ? (
+        <Typography align="center">No items in your cart</Typography>
+      ) : (
+        <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', md: 'row' } }}>
+          <Box flex={2}>
+            {data.map((item) => (
+              <Card
+                key={item._id}
+                sx={{
+                  mb: 3,
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  p: 2,
+                  borderRadius: 4,
+                  boxShadow: 3,
+                  backgroundColor: '#fafafa',
+                  width: '100%',
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  sx={{
+                    width: { xs: '100%', sm: 200 },
+                    height: { xs: 200, sm: 'auto' },
+                    objectFit: 'contain',
+                    background: '#f0f0f0',
+                    borderRadius: 2,
+                  }}
+                  image={item?.productId?.productImage[0]}
+                />
+                <CardContent sx={{ flex: 1 }}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="h6">
+                      {item?.productId?.productName}
+                    </Typography>
+                    <IconButton color="error" onClick={() => deleteCartProduct(item._id)}>
+                      <MdDelete />
+                    </IconButton>
+                  </Box>
+                  <Typography color="text.secondary" mb={1}>
+                    {item?.productId?.category}
+                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography color="primary">
+                      {displayINRCurrency(item?.productId?.sellingPrice)}
+                    </Typography>
+                    <Typography fontWeight="bold">
+                      {displayINRCurrency(item?.productId?.sellingPrice * item.quantity)}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      disabled={item.quantity <= 1}
+                      onClick={() => updateQty(item._id, item.quantity - 1)}
+                    >
+                      -
+                    </Button>
+                    <Typography>{item.quantity}</Typography>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      onClick={() => updateQty(item._id, item.quantity + 1)}
+                    >
+                      +
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
 
-                                    <h2 className='text-lg lg:text-xl text-ellipsis line-clamp-1'>{product?.productId?.productName}</h2>
-                                    <p className='capitalize text-slate-500'>{product?.productId.category}</p>
-                                    <div className='flex items-center justify-between'>
-                                            <p className='text-red-600 font-medium text-lg'>{displayINRCurrency(product?.productId?.sellingPrice)}</p>
-                                            <p className='text-slate-600 font-semibold text-lg'>{displayINRCurrency(product?.productId?.sellingPrice  * product?.quantity)}</p>
-                                    </div>
-                                    <div className='flex items-center gap-3 mt-1'>
-                                        <button className='border border-red-600 text-red-600 hover:bg-red-600 hover:text-white w-6 h-6 flex justify-center items-center rounded ' onClick={()=>decraseQty(product?._id,product?.quantity)}>-</button>
-                                        <span>{product?.quantity}</span>
-                                        <button className='border border-red-600 text-red-600 hover:bg-red-600 hover:text-white w-6 h-6 flex justify-center items-center rounded ' onClick={()=>increaseQty(product?._id,product?.quantity)}>+</button>
-                                    </div>
-                                </div>    
-                            </div>
-                           )
-                          })
-                        )
-                    }
-                </div>
+          <Box flex={1} sx={{ position: { md: 'sticky' }, top: 100 }}>
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Order Summary
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Box display="flex" justifyContent="space-between" mb={2}>
+                <Typography>Total Quantity</Typography>
+                <Typography>{totalQty}</Typography>
+              </Box>
+              <Box display="flex" justifyContent="space-between" mb={2}>
+                <Typography>Total Price</Typography>
+                <Typography>{displayINRCurrency(totalPrice)}</Typography>
+              </Box>
+              <Button variant="contained" color="primary" fullWidth>
+                Proceed to Payment
+              </Button>
+            </Paper>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+};
 
-
-                {/***summary  */}
-                <div className='mt-5 lg:mt-0 w-full max-w-sm'>
-                        {
-                            loading ? (
-                            <div className='h-36 bg-slate-200 border border-slate-300 animate-pulse'>
-                                
-                            </div>
-                            ) : (
-                                <div className='h-36 bg-white'>
-                                    <h2 className='text-white bg-red-600 px-4 py-1'>Summary</h2>
-                                    <div className='flex items-center justify-between px-4 gap-2 font-medium text-lg text-slate-600'>
-                                        <p>Quantity</p>
-                                        <p>{totalQty}</p>
-                                    </div>
-
-                                    <div className='flex items-center justify-between px-4 gap-2 font-medium text-lg text-slate-600'>
-                                        <p>Total Price</p>
-                                        <p>{displayINRCurrency(totalPrice)}</p>    
-                                    </div>
-
-                                    <button className='bg-blue-600 p-2 text-white w-full mt-2'>Payment</button>
-
-                                </div>
-                            )
-                        }
-                </div>
-        </div>
-    </div>
-  )
-}
-
-export default Cart
+export default Cart;

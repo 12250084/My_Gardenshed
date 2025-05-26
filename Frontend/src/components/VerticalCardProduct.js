@@ -5,101 +5,130 @@ import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
 import addToCart from '../helpers/addToCart'
 import Context from '../context'
+import { motion } from 'framer-motion'
 
-const VerticalCardProduct = ({category, heading}) => {
-    const [data,setData] = useState([])
-    const [loading,setLoading] = useState(true)
-    const loadingList = new Array(13).fill(null)
+const VerticalCardProduct = ({ category, heading }) => {
+    const [data, setData] = useState([])
+    const [loading, setLoading] = useState(true)
+    const loadingList = new Array(4).fill(null) // Reduced skeleton loaders
 
-    const [scroll,setScroll] = useState(0)
     const scrollElement = useRef()
-
     const { fetchUserAddToCart } = useContext(Context)
 
-    const handleAddToCart = async(e,id)=>{
-       await addToCart(e,id)
-       fetchUserAddToCart()
+    const handleAddToCart = async (e, id) => {
+        e.preventDefault()
+        await addToCart(e, id)
+        fetchUserAddToCart()
     }
 
-    const fetchData = async() =>{
+    const fetchData = async () => {
         setLoading(true)
         const categoryProduct = await fetchCategoryWiseProduct(category)
         setLoading(false)
-
-        console.log("horizontal data",categoryProduct.data)
-        setData(categoryProduct?.data)
+        setData(categoryProduct?.data || [])
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchData()
-    },[])
+    }, [category])
 
-    const scrollRight = () =>{
-        scrollElement.current.scrollLeft += 300
-    }
-    const scrollLeft = () =>{
-        scrollElement.current.scrollLeft -= 300
+    const scrollRight = () => {
+        scrollElement.current.scrollBy({ left: 320, behavior: 'smooth' })
     }
 
+    const scrollLeft = () => {
+        scrollElement.current.scrollBy({ left: -320, behavior: 'smooth' })
+    }
 
-  return (
-    <div className='container mx-auto px-4 my-6 relative'>
+    return (
+        <div className='container mx-auto px-4 my-8 relative'>
+            <div className='flex items-center justify-between mb-4'>
+                <h2 className='text-2xl font-bold text-gray-800'>{heading}</h2>
+                <div className='flex gap-2'>
+                    <button
+                        className='bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-md transition-all'
+                        onClick={scrollLeft}
+                    >
+                        <FaAngleLeft className='text-lg' />
+                    </button>
+                    <button
+                        className='bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-md transition-all'
+                        onClick={scrollRight}
+                    >
+                        <FaAngleRight className='text-lg' />
+                    </button>
+                </div>
+            </div>
 
-            <h2 className='text-2xl font-semibold py-4'>{heading}</h2>
-
-                
-           <div className='flex items-center gap-4 md:gap-6 overflow-x-scroll scrollbar-none transition-all' ref={scrollElement}>
-
-            <button  className='bg-white shadow-md rounded-full p-1 absolute left-0 text-lg hidden md:block' onClick={scrollLeft}><FaAngleLeft/></button>
-            <button  className='bg-white shadow-md rounded-full p-1 absolute right-0 text-lg hidden md:block' onClick={scrollRight}><FaAngleRight/></button> 
-
-           {
-
-                loading ? (
-                    loadingList.map((product,index)=>{
-                        return(
-                            <div className='w-full min-w-[280px]  md:min-w-[320px] max-w-[280px] md:max-w-[320px]  bg-white rounded-sm shadow '>
-                                <div className='bg-slate-200 h-48 p-4 min-w-[280px] md:min-w-[145px] flex justify-center items-center animate-pulse'>
+            <div
+                className='flex items-center gap-6 overflow-x-auto scrollbar-none pb-6'
+                ref={scrollElement}
+            >
+                {loading ? (
+                    loadingList.map((_, index) => (
+                        <div
+                            key={index}
+                            className='flex-shrink-0 w-72 bg-white rounded-lg shadow-md overflow-hidden'
+                        >
+                            <div className='bg-gray-100 h-48 w-full animate-pulse'></div>
+                            <div className='p-4 space-y-3'>
+                                <div className='h-5 bg-gray-100 rounded-full animate-pulse w-3/4'></div>
+                                <div className='h-4 bg-gray-100 rounded-full animate-pulse w-1/2'></div>
+                                <div className='flex gap-3'>
+                                    <div className='h-5 bg-gray-100 rounded-full animate-pulse w-1/3'></div>
+                                    <div className='h-5 bg-gray-100 rounded-full animate-pulse w-1/3'></div>
                                 </div>
-                                <div className='p-4 grid gap-3'>
-                                    <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black p-1 py-2 animate-pulse rounded-full bg-slate-200'></h2>
-                                    <p className='capitalize text-slate-500 p-1 animate-pulse rounded-full bg-slate-200  py-2'></p>
-                                    <div className='flex gap-3'>
-                                        <p className='text-red-600 font-medium p-1 animate-pulse rounded-full bg-slate-200 w-full  py-2'></p>
-                                        <p className='text-slate-500 line-through p-1 animate-pulse rounded-full bg-slate-200 w-full  py-2'></p>
-                                    </div>
-                                    <button className='text-sm  text-white px-3  rounded-full bg-slate-200  py-2 animate-pulse'></button>
-                                </div>
+                                <div className='h-8 bg-gray-100 rounded-full animate-pulse'></div>
                             </div>
-                        )
-                    })
+                        </div>
+                    ))
                 ) : (
-                    data.map((product,index)=>{
-                        return(
-                            <Link to={"product/"+product?._id} className='w-full min-w-[280px]  md:min-w-[320px] max-w-[280px] md:max-w-[320px]  bg-white rounded-sm shadow '>
-                                <div className='bg-slate-200 h-48 p-4 min-w-[280px] md:min-w-[145px] flex justify-center items-center'>
-                                    <img src={product.productImage[0]} className='object-scale-down h-full hover:scale-110 transition-all mix-blend-multiply'/>
+                    data.map((product) => (
+                        <motion.div
+                            key={product._id}
+                            whileHover={{ y: -5 }}
+                            transition={{ duration: 0.2 }}
+                            className='flex-shrink-0 w-72 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all'
+                        >
+                            <Link to={`product/${product._id}`} className='block'>
+                                <div className='bg-gray-50 h-48 flex items-center justify-center p-4'>
+                                    <img
+                                        src={product.productImage[0]}
+                                        className='object-contain h-full hover:scale-105 transition-transform duration-300 mix-blend-multiply'
+                                        alt={product.productName}
+                                    />
                                 </div>
-                                <div className='p-4 grid gap-3'>
-                                    <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black'>{product?.productName}</h2>
-                                    <p className='capitalize text-slate-500'>{product?.category}</p>
-                                    <div className='flex gap-3'>
-                                        <p className='text-red-600 font-medium'>{ displayINRCurrency(product?.sellingPrice) }</p>
-                                        <p className='text-slate-500 line-through'>{ displayINRCurrency(product?.price)  }</p>
+                                <div className='p-4 space-y-3'>
+                                    <h3 className='font-semibold text-gray-800 text-lg truncate'>
+                                        {product.productName}
+                                    </h3>
+                                    <p className='text-gray-500 text-sm capitalize'>
+                                        {product.category}
+                                    </p>
+                                    <div className='flex items-center gap-3'>
+                                        <span className='text-red-600 font-bold text-lg'>
+                                            {displayINRCurrency(product.sellingPrice)}
+                                        </span>
+                                        {product.price > product.sellingPrice && (
+                                            <span className='text-gray-400 text-sm line-through'>
+                                                {displayINRCurrency(product.price)}
+                                            </span>
+                                        )}
                                     </div>
-                                    <button className='text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-0.5 rounded-full' onClick={(e)=>handleAddToCart(e,product?._id)}>Add to Cart</button>
+                                    <button
+                                        className='w-full py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-medium rounded-lg transition-all'
+                                        onClick={(e) => handleAddToCart(e, product._id)}
+                                    >
+                                        Add to Cart
+                                    </button>
                                 </div>
                             </Link>
-                        )
-                    })
-                )
-                
-            }
-           </div>
-            
-
-    </div>
-  )
+                        </motion.div>
+                    ))
+                )}
+            </div>
+        </div>
+    )
 }
 
 export default VerticalCardProduct

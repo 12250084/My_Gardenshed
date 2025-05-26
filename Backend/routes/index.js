@@ -22,7 +22,18 @@ const updateAddToCartProduct = require('../controller/user/updateAddToCartProduc
 const deleteAddToCartProduct = require('../controller/user/deleteAddToCartProduct')
 const searchProduct = require('../controller/product/searchProduct')
 const filterProductController = require('../controller/product/filterProduct')
+const clearCart = require('../controller/product/clearCart')
+const submitOrder = require('../controller/product/submitOrder')
+const orderDetails = require('../controller/product/orderDetails')
 
+// Thermofoil product
+const createThermofoilHandler = require('../controller/product/createThermofoil')
+const getAllThermofoil = require('../controller/product/getAllThermofoil')
+
+//chat with AI
+const chatWithAI = require('../controller/chat/chatWithAI')
+
+const createCheckoutSession = require('../controller/product/createCheckoutSession')
 
 
 router.post("/signup",userSignUpController)
@@ -44,6 +55,10 @@ router.post("/product-details",getProductDetails)
 router.get("/search",searchProduct)
 router.post("/filter-product",filterProductController)
 
+// Thermofoil product
+router.post("/create-thermofoil",authToken,createThermofoilHandler)
+router.get("/get-all-thermofoil",getAllThermofoil)
+
 //user add to cart
 router.post("/addtocart",authToken,addToCartController)
 router.get("/countAddToCartProduct",authToken,countAddToCartProduct)
@@ -53,8 +68,17 @@ router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
 
 
 
+router.post("/chat", chatWithAI)
 
 
+//checkout
+
+router.post("/create-checkout-session", authToken, createCheckoutSession)
+
+//clear cart
+router.post("/clear-cart", authToken, clearCart)
+router.post("/submit-order", authToken, submitOrder)
+router.get("/order-details", orderDetails)
 
 
 module.exports = router

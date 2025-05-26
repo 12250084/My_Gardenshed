@@ -2,12 +2,12 @@ const addToCartModel = require("../../models/cartProduct")
 
 const addToCartController = async(req,res)=>{
     try{
-        const { productId } = req?.body
+        const { productId,itemType } = req?.body
         const currentUser = req.userId
 
-        const isProductAvailable = await addToCartModel.findOne({ productId })
+        const isProductAvailable = await addToCartModel.findOne({ itemId: productId})
 
-        console.log("isProductAvailabl   ",isProductAvailable)
+        console.log("isProductAvailable  ",isProductAvailable)
 
         if(isProductAvailable){
             return res.json({
@@ -18,7 +18,8 @@ const addToCartController = async(req,res)=>{
         }
 
         const payload  = {
-            productId : productId,
+            itemId : productId,
+            itemType : itemType,
             quantity : 1,
             userId : currentUser,
         }

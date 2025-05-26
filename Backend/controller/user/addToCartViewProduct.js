@@ -1,12 +1,14 @@
 const addToCartModel = require("../../models/cartProduct")
-
+const productModel = require("../../models/productModel")
+const thermofoilModel = require("../../models/thermofoil")
 const addToCartViewProduct = async(req,res)=>{
     try{
         const currentUser = req.userId
 
-        const allProduct = await addToCartModel.find({
-            userId : currentUser
-        }).populate("productId")
+        //populate the product details in the cart based on the itemType
+        const allProduct = await addToCartModel.find({ userId: currentUser })
+            .populate('itemId');
+
 
         res.json({
             data : allProduct,

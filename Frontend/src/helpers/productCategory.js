@@ -12,6 +12,9 @@ const productCategory = [
     { id: 11, label: "Doors & Windows", value: "doors-windows" },
     { id: 12, label: "Accessories", value: "shed-accessories" }
   ];
-  
+
+
+
+
   export default productCategory;
   

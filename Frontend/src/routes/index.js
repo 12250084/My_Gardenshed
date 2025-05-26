@@ -11,6 +11,13 @@ import CategoryProduct from '../pages/CategoryProduct'
 import ProductDetails from '../pages/ProductDetails'
 import Cart from '../pages/Cart'
 import SearchProduct from '../pages/SearchProduct'
+import Thermofoil from "../pages/Thermofoil";
+import ThermofoilProducts from "../pages/Thermofoil";
+import AllProductsPage from "../pages/CustomShedsProduct";
+import SuccessPayment from "../pages/SuccessPayment";
+import FailurePayment from "../pages/FailurePayment";
+import ContactUs from "../pages/ContactUs";
+import OrderDetails from "../pages/OrderDetails";
 
 const router = createBrowserRouter([
     {
@@ -60,9 +67,41 @@ const router = createBrowserRouter([
                     {
                         path : "all-products",
                         element : <AllProducts/>
+                    },
+                    {
+                        path: "orders",
+                        element : <OrderDetails/>
                     }
                 ]
             },
+            {
+                path: "thermofoil",
+                element : <ThermofoilProducts/>
+            },
+            {
+                path: "thermofoil/:productId",
+                element : <ThermofoilProducts/>
+            },
+            {
+                path: "custom-sheds",
+                element : <AllProductsPage/>
+            },
+            {
+                path: "custom-sheds/:productId",
+                element : <AllProductsPage/>
+            },
+            {
+                path: "success",
+                element: <SuccessPayment/>
+            },
+            {
+                path : "cancel",
+                element: <FailurePayment/>
+            },
+            {
+                path : "contact",
+                element: <ContactUs/>
+            }
         ]
     }
 ])

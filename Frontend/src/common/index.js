@@ -1,4 +1,4 @@
-const backendDomin = "http://localhost:8080"
+const backendDomin = "http://localhost:5000"
 
 const SummaryApi = {
     signUP : {
@@ -76,6 +76,35 @@ const SummaryApi = {
     filterProduct : {
         url : `${backendDomin}/api/filter-product`,
         method : 'post'
+    },
+    uploadThermofoilProduct : {
+        url : `${backendDomin}/api/create-thermofoil`,
+        method : 'post'
+    },
+    //get-all-thermofoil
+    getAllThermofoil : {
+        url : `${backendDomin}/api/get-all-thermofoil`,
+        method : 'get'
+    },
+    chatWithAI: {
+        url: `${backendDomin}/api/chat`,
+        method: "POST"
+    },
+    createCheckoutSession: {
+        url: `${backendDomin}/api/create-checkout-session`,
+        method: "POST"
+    },
+    clearCart: {
+        url: `${backendDomin}/api/clear-cart`,
+        method: "POST"
+    },
+    submitOrder: {
+        url: `${backendDomin}/api/submit-order`,
+        method: "POST"
+    },
+    orderDetails: {
+        url: `${backendDomin}/api/order-details`,
+        method: "GET"
     }
 }
 

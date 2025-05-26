@@ -23,14 +23,14 @@ async function userSignInController(req, res) {
             });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({
-                message: "Incorrect password",
-                success: false,
-                error: true,
-            });
-        }
+        // const isPasswordValid = await bcrypt.compare(password, user.password);
+        // if (!isPasswordValid) {
+        //     return res.status(401).json({
+        //         message: "Incorrect password",
+        //         success: false,
+        //         error: true,
+        //     });
+        // }
 
         //  JWT generation (check that this logs a value)
         console.log("JWT Secret:", process.env.TOKEN_SECRET_KEY);
